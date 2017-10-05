@@ -7,10 +7,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
@@ -18,6 +21,8 @@ public class MainActivity extends Activity {
     private Button botaoAdicionar;
     private ListView listaTarefas;
     private SQLiteDatabase bancoDados;
+    private ArrayAdapter<String> itensAdaptador;
+    private ArrayList<String> itens;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +33,6 @@ public class MainActivity extends Activity {
             //Recuperar componentes
             textoTarefa = (EditText) findViewById(R.id.textoId);
             botaoAdicionar = (Button) findViewById(R.id.botaoAdicionarId);
-            listaTarefas = (ListView) findViewById(R.id.listViewId);
 
             //Banco de Dados
             bancoDados = openOrCreateDatabase("apptarefas", MODE_PRIVATE, null);
@@ -46,20 +50,10 @@ public class MainActivity extends Activity {
                 }
             });
 
-            //Recupera as Tarefas
-            Cursor cursor = bancoDados.rawQuery("SELECT * FROM tarefas", null);
+            //Recuperar tarefas
+            recuperarTarefas();
 
-            //Recupera os ID's das colunas
-            int indiceColunaId = cursor.getColumnIndex("id");
-            int indiceColunaTarefa = cursor.getColumnIndex("tarefa");
 
-            //Listar as Tarefas
-            cursor.moveToFirst();
-            while (cursor != null) {
-
-                Log.i("Resultado - ", "Tarefa: " + cursor.getString(indiceColunaTarefa));
-                cursor.moveToNext();
-            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,11 +70,50 @@ public class MainActivity extends Activity {
             } else {
                 bancoDados.execSQL("INSERT INTO tarefas (tarefa) VALUES ('" + texto + "')");
                 Toast.makeText(MainActivity.this,"Tarefa salva com sucesso!", Toast.LENGTH_SHORT).show();
+                recuperarTarefas();//atualiza a tabela com a nova tarefa adicionada
+                textoTarefa.setText("");//apaga o texto da caixa de insercao das tarefas
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void recuperarTarefas(){
+
+        try {
+
+            //Recupera as Tarefas
+            Cursor cursor = bancoDados.rawQuery("SELECT * FROM tarefas ORDER BY id DESC", null);
+
+            //Recupera os ID's das colunas
+            int indiceColunaId = cursor.getColumnIndex("id");
+            int indiceColunaTarefa = cursor.getColumnIndex("tarefa");
+
+            //Lista
+            listaTarefas = (ListView) findViewById(R.id.listViewId);
+
+            //Criar adaptador
+            itens = new ArrayList<String>();
+            itensAdaptador = new ArrayAdapter<String>(getApplicationContext(),
+                    android.R.layout.simple_list_item_2,
+                    android.R.id.text2,
+                    itens);
+            listaTarefas.setAdapter(itensAdaptador);
+
+            //Listar as Tarefas
+            cursor.moveToFirst();
+            while (cursor != null) {
+
+                Log.i("Resultado - ", "Tarefa: " + cursor.getString(indiceColunaTarefa));
+                itens.add(cursor.getString(indiceColunaTarefa));
+                cursor.moveToNext();
+            }
+
+        } catch (Exception e){
+            e.printStackTrace();
+
+        }
     }
 }
