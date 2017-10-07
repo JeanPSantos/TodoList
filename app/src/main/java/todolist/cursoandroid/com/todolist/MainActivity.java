@@ -35,6 +35,7 @@ public class MainActivity extends Activity {
             //Recuperar componentes
             textoTarefa = (EditText) findViewById(R.id.textoId);
             botaoAdicionar = (Button) findViewById(R.id.botaoAdicionarId);
+
             //Lista
             listaTarefas = (ListView) findViewById(R.id.listViewId);
 
@@ -50,13 +51,13 @@ public class MainActivity extends Activity {
 
                     String textoDigitado = textoTarefa.getText().toString();
                     salvarTarefa(textoDigitado);
-
                 }
             });
 
             listaTarefas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    removerTarefa(ids.get(i));
 
                 }
             });
@@ -64,14 +65,9 @@ public class MainActivity extends Activity {
             //Recuperar tarefas
             recuperarTarefas();
 
-
-
         } catch (Exception e) {
             e.printStackTrace();
-
         }
-
-
     }
 
     private void salvarTarefa(String texto) {
@@ -88,13 +84,10 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     private void recuperarTarefas(){
-
         try {
-
             //Recupera as Tarefas
             Cursor cursor = bancoDados.rawQuery("SELECT * FROM tarefas ORDER BY id DESC", null);
 
@@ -106,6 +99,7 @@ public class MainActivity extends Activity {
 
             //Criar adaptador
             itens = new ArrayList<String>();
+            ids = new ArrayList<Integer>();
             itensAdaptador = new ArrayAdapter<String>(getApplicationContext(),
                     android.R.layout.simple_list_item_2,
                     android.R.id.text2,
@@ -132,6 +126,8 @@ public class MainActivity extends Activity {
         try {
 
             bancoDados.execSQL("DELETE FROM tarefas WHERE id=" + id);
+            Toast.makeText(MainActivity.this,"Tarefa removida com sucesso!", Toast.LENGTH_SHORT).show();
+            recuperarTarefas();
 
         } catch (Exception e){
                 e.printStackTrace();
