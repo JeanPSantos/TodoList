@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +24,7 @@ public class MainActivity extends Activity {
     private SQLiteDatabase bancoDados;
     private ArrayAdapter<String> itensAdaptador;
     private ArrayList<String> itens;
+    private ArrayList<Integer> ids;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,8 @@ public class MainActivity extends Activity {
             //Recuperar componentes
             textoTarefa = (EditText) findViewById(R.id.textoId);
             botaoAdicionar = (Button) findViewById(R.id.botaoAdicionarId);
+            //Lista
+            listaTarefas = (ListView) findViewById(R.id.listViewId);
 
             //Banco de Dados
             bancoDados = openOrCreateDatabase("apptarefas", MODE_PRIVATE, null);
@@ -46,6 +50,13 @@ public class MainActivity extends Activity {
 
                     String textoDigitado = textoTarefa.getText().toString();
                     salvarTarefa(textoDigitado);
+
+                }
+            });
+
+            listaTarefas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 }
             });
@@ -91,8 +102,7 @@ public class MainActivity extends Activity {
             int indiceColunaId = cursor.getColumnIndex("id");
             int indiceColunaTarefa = cursor.getColumnIndex("tarefa");
 
-            //Lista
-            listaTarefas = (ListView) findViewById(R.id.listViewId);
+
 
             //Criar adaptador
             itens = new ArrayList<String>();
@@ -108,12 +118,23 @@ public class MainActivity extends Activity {
 
                 Log.i("Resultado - ", "Tarefa: " + cursor.getString(indiceColunaTarefa));
                 itens.add(cursor.getString(indiceColunaTarefa));
+                ids.add(Integer.parseInt(cursor.getString(indiceColunaId)));
                 cursor.moveToNext();
             }
 
         } catch (Exception e){
             e.printStackTrace();
 
+        }
+    }
+
+    private void removerTarefa(Integer id) {
+        try {
+
+            bancoDados.execSQL("DELETE FROM tarefas WHERE id=" + id);
+
+        } catch (Exception e){
+                e.printStackTrace();
         }
     }
 }
