@@ -54,11 +54,12 @@ public class MainActivity extends Activity {
                 }
             });
 
-            listaTarefas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            listaTarefas.setLongClickable(true);
+            listaTarefas.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                     removerTarefa(ids.get(i));
-
+                    return true;
                 }
             });
 
